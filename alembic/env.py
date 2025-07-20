@@ -1,9 +1,11 @@
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from alembic import context
-
 import os
 import sys
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context  # type: ignore
+
 sys.path.append(os.getcwd())
 from app.core.config import settings
 from app.db.base import Base
@@ -16,20 +18,22 @@ config.set_main_option(
     f"{settings.postgres_password}@"
     f"{settings.postgres_host}:"
     f"{settings.postgres_port}/"
-    f"{settings.postgres_db}"
+    f"{settings.postgres_db}",
 )
 
 fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
 
-def run_migrations_offline():
+
+def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
         context.run_migrations()
 
-def run_migrations_online():
+
+def run_migrations_online() -> None:
     url = config.get_main_option("sqlalchemy.url")
     connectable = engine_from_config(
         {"url": url},
@@ -40,6 +44,7 @@ def run_migrations_online():
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()
