@@ -17,7 +17,9 @@ def apply_migrations() -> None:
         logger.info("Applying database migrations...")
         alembic_ini_path = os.path.join(os.getcwd(), "alembic.ini")
         alembic_path = os.path.join(os.getcwd(), ".venv", "bin", "alembic")
-        subprocess.run([alembic_path, "-c", alembic_ini_path, "upgrade", "head"], check=True)  # noqa: S603
+        subprocess.run(
+            [alembic_path, "-c", alembic_ini_path, "upgrade", "head"], check=True
+        )  # noqa: S603
         logger.info("Database migrations applied successfully")
     except Exception as e:
         logger.error(f"Error applying database migrations: {e}")

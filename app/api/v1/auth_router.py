@@ -11,13 +11,15 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+def get_current_user(
+    token: str = Security(oauth2_scheme), db: Session = Depends(get_db)
+) -> User:
     auth_service = AuthService(db)
     return auth_service.get_current_user(token)
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def register(user_in: UserCreate, db: Session = Depends(get_db)) -> User:
+def register(user_in: UserCreate, db: Session = Depends(get_db)) -> UserRead:
     """
     Register a new user
     """
@@ -26,7 +28,9 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> User:
 
 
 @router.post("/login", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> Token:
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
@@ -44,7 +48,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 
 @router.get("/me", response_model=UserRead)
-def read_users_me(current_user: User = Depends(get_current_user)) -> User:
+def read_users_me(current_user: User = Depends(get_current_user)) -> UserRead:
     """
     Get current user information
     """

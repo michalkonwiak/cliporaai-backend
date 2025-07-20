@@ -1,4 +1,4 @@
-from typing import Any, Protocol, TypeVar, cast
+from typing import Any, Generic, Protocol, TypeVar, cast
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -24,7 +24,7 @@ CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
-class BaseRepository[ModelType, CreateSchemaType, UpdateSchemaType]:
+class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     """
     Base repository with default CRUD operations
     """
@@ -60,7 +60,9 @@ class BaseRepository[ModelType, CreateSchemaType, UpdateSchemaType]:
         self.db.refresh(db_obj)
         return db_obj
 
-    def update(self, db_obj: ModelType, obj_in: UpdateSchemaType | dict[str, Any]) -> ModelType:
+    def update(
+        self, db_obj: ModelType, obj_in: UpdateSchemaType | dict[str, Any]
+    ) -> ModelType:
         """Update an existing record"""
         obj_data = jsonable_encoder(db_obj)
 

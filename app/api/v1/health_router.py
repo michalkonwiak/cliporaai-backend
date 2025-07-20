@@ -29,7 +29,7 @@ router = APIRouter(prefix="/health", tags=["Health"])
 logger = logging.getLogger(__name__)
 
 
-@router.get("")
+@router.get("", response_model=HealthStatus)
 def health_check(
     db: Session = Depends(get_db),
     redis_client: redis.Redis = Depends(get_redis_client),
