@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install uv & dependencies
+        run: |
+          pip install uv
+          uv sync --locked --no-install-project
+
+      - name: Run pre-commit
+        run: |
+          uv run pre-commit run --all-files --show-diff-on-failure

@@ -1,0 +1,67 @@
+[project]
+name = "cliporaai-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.16.4",
+    "black>=25.1.0",
+    "fastapi[all]>=0.116.1",
+    "mypy>=1.17.0",
+    "pre-commit>=4.2.0",
+    "psycopg2-binary>=2.9.10",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "python-multipart>=0.0.20",
+    "ruff>=0.12.4",
+    "sqlalchemy-stubs>=0.4",
+    "types-redis>=4.6.0.20240311",
+]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = "alembic.*"
+ignore_missing_imports = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = "uvicorn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "fastapi.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "app.main"
+disallow_untyped_decorators = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "N", "UP", "ANN", "S", "A", "C4", "T20", "PT", "RET", "SIM", "ARG", "ERA"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true
