@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-import pytest  # type: ignore
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -19,7 +19,7 @@ engine = create_engine(
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def db() -> Generator[Session]:
     """
     Create a fresh database for each test
@@ -37,7 +37,7 @@ def db() -> Generator[Session]:
         Base.metadata.drop_all(bind=engine)
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def client(db: Session) -> Generator[TestClient]:
     """
     Create a test client with a database session
@@ -56,7 +56,7 @@ def client(db: Session) -> Generator[TestClient]:
     app.dependency_overrides = {}
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def test_user(db: Session) -> User:
     """
     Create a test user
@@ -74,7 +74,7 @@ def test_user(db: Session) -> User:
     return user
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def test_superuser(db: Session) -> User:
     """
     Create a test superuser
@@ -92,7 +92,7 @@ def test_superuser(db: Session) -> User:
     return user
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def token_headers(db: Session, test_user: User) -> dict[str, str]:
     """
     Get token headers for the test user
@@ -102,7 +102,7 @@ def token_headers(db: Session, test_user: User) -> dict[str, str]:
     return {"Authorization": f"Bearer {token.access_token}"}
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def superuser_token_headers(db: Session, test_superuser: User) -> dict[str, str]:
     """
     Get token headers for the test superuser

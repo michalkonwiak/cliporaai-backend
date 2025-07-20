@@ -1,5 +1,5 @@
 # ruff: noqa: S101, S106, S105
-import pytest  # type: ignore
+import pytest
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
