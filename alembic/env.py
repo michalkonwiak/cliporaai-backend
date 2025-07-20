@@ -4,7 +4,7 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
-from alembic import context  # type: ignore
+from alembic import context
 
 sys.path.append(os.getcwd())
 from app.core.config import settings
@@ -21,7 +21,8 @@ config.set_main_option(
     f"{settings.postgres_db}",
 )
 
-fileConfig(config.config_file_name)
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
 

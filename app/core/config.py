@@ -19,7 +19,12 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 8000
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
 
+    log_level: str = "INFO"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()  # type: ignore
