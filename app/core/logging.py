@@ -24,7 +24,7 @@ LOGGING_CONFIG = {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "default",
             "filename": "logs/app.log",
-            "maxBytes": 10*1024*1024,
+            "maxBytes": 10 * 1024 * 1024,
             "backupCount": 5,
         },
     },
@@ -33,6 +33,7 @@ LOGGING_CONFIG = {
         "level": LOG_LEVEL,
     },
 }
+
 
 def setup_logging() -> None:
     logs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "logs")

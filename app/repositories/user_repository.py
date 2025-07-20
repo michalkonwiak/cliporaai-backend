@@ -25,15 +25,12 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
         Create a new user with hashed password
         """
         user_data = user_in.model_dump(exclude={"password"})
-        db_user = User(
-            **user_data,
-            hashed_password=hash_password(user_in.password)
-        )
+        db_user = User(**user_data, hashed_password=hash_password(user_in.password))
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
         return db_user
-        
+
     def update_password(self, user: User, new_password: str) -> User:
         """
         Update user's password

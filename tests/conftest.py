@@ -13,9 +13,7 @@ from app.models.user import User
 from app.services.auth_service import AuthService
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -26,7 +24,7 @@ def db() -> Generator[Session]:
     """
     # Create the database tables
     Base.metadata.create_all(bind=engine)
-    
+
     # Create a new session for the test
     db = TestingSessionLocal()
     try:
@@ -42,17 +40,18 @@ def client(db: Session) -> Generator[TestClient]:
     """
     Create a test client with a database session
     """
+
     def override_get_db() -> Generator[Session]:
         try:
             yield db
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     with TestClient(app) as c:
         yield c
-    
+
     app.dependency_overrides = {}
 
 
@@ -65,7 +64,7 @@ def test_user(db: Session) -> User:
         "email": "test@example.com",
         "hashed_password": hash_password("password123"),
         "is_active": True,
-        "is_superuser": False
+        "is_superuser": False,
     }
     user = User(**user_data)
     db.add(user)
@@ -83,7 +82,7 @@ def test_superuser(db: Session) -> User:
         "email": "admin@example.com",
         "hashed_password": hash_password("admin123"),
         "is_active": True,
-        "is_superuser": True
+        "is_superuser": True,
     }
     user = User(**user_data)
     db.add(user)

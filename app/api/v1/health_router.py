@@ -24,6 +24,7 @@ class HealthStatus(TypedDict):
     status: str
     services: Services
 
+
 router = APIRouter(prefix="/health", tags=["Health"])
 logger = logging.getLogger(__name__)
 
@@ -42,13 +43,13 @@ def health_check(
     app_status: ServiceStatus = {"status": "ok"}
     database_status: ServiceStatus = {"status": "ok"}
     redis_status: ServiceStatus = {"status": "ok"}
-    
+
     services: Services = {
         "app": app_status,
         "database": database_status,
         "redis": redis_status,
     }
-    
+
     health_status: HealthStatus = {
         "status": "ok",
         "services": services,

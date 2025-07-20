@@ -11,6 +11,7 @@ from app.core.logging import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
+
 def apply_migrations() -> None:
     try:
         logger.info("Applying database migrations...")
@@ -21,6 +22,7 @@ def apply_migrations() -> None:
     except Exception as e:
         logger.error(f"Error applying database migrations: {e}")
         raise
+
 
 apply_migrations()
 
