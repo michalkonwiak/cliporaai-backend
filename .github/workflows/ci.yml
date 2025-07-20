@@ -22,6 +22,7 @@ jobs:
       - name: Install uv & dependencies
         run: |
           pip install uv
+          uv lock
           uv sync --locked --no-install-project
 
       - name: Run pre-commit
