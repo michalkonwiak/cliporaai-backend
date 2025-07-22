@@ -65,6 +65,8 @@ def test_user(db: Session) -> User:
     user_data = {
         "email": "test@example.com",
         "hashed_password": hash_password("password123"),
+        "first_name": "Test",
+        "last_name": "User",
         "is_active": True,
         "is_superuser": False,
     }
@@ -83,6 +85,8 @@ def test_superuser(db: Session) -> User:
     user_data = {
         "email": "admin@example.com",
         "hashed_password": hash_password("admin123"),
+        "first_name": "Admin",
+        "last_name": "Super",
         "is_active": True,
         "is_superuser": True,
     }

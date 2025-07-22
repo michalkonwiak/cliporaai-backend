@@ -9,6 +9,7 @@ dependencies = [
     "bcrypt<4.0.0",
     "black>=25.1.0",
     "fastapi[all]>=0.116.1",
+    "jwt>=1.4.0",
     "mypy>=1.17.0",
     "passlib>=1.7.4",
     "pre-commit>=4.2.0",

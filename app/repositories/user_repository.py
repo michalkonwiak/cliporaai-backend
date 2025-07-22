@@ -36,7 +36,7 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
         Update user's password
         """
         hashed_password = hash_password(new_password)
-        user.hashed_password = hashed_password
+        user.hashed_password = hashed_password  # type: ignore[assignment]
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
