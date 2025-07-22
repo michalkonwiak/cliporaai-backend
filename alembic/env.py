@@ -9,6 +9,7 @@ from alembic import context  # type: ignore
 sys.path.append(os.getcwd())
 from app.core.config import settings
 from app.db.base import Base
+
 # Import all models to ensure they are registered with Base.metadata
 from app.models.user import User  # noqa: F401
 

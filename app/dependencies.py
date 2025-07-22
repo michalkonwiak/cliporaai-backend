@@ -53,13 +53,15 @@ def get_redis_client() -> Generator[redis.Redis]:
 
 # Authentication dependencies
 
+
 async def get_current_user_token(
-    credentials: HTTPAuthorizationCredentials = Security(security)
+    credentials: HTTPAuthorizationCredentials = Security(security),
 ) -> str:
     """Extract JWT token from Authorization header"""
     if not credentials:
         raise credentials_exception
-    return credentials.credentials
+    return str(credentials.credentials)
+
 
 async def verify_token(token: str = Depends(get_current_user_token)) -> Dict[str, Any]:
     """Verify JWT token and extract payload"""
@@ -82,10 +84,8 @@ async def verify_token(token: str = Depends(get_current_user_token)) -> Dict[str
         )
 
 
-
 async def get_current_user(
-    db: Session = Depends(get_db),
-    token_payload: Dict[str, Any] = Depends(verify_token)
+    db: Session = Depends(get_db), token_payload: Dict[str, Any] = Depends(verify_token)
 ) -> User:
     """Get current authenticated user from token"""
     user_id = token_payload.get("sub")
@@ -98,8 +98,7 @@ async def get_current_user(
 
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
 
     # Update last login

@@ -1,8 +1,10 @@
 from fastapi import HTTPException, status
 
+
 # Base exceptions
 class CliporaAIException(Exception):
     """Base exception for CliporaAI application"""
+
     def __init__(self, message: str, error_code: str | None = None):
         self.message = message
         self.error_code = error_code
@@ -16,6 +18,8 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 
+
 class TokenExpiredError(CliporaAIException):
     """Raised when authentication token has expired"""
+
     pass

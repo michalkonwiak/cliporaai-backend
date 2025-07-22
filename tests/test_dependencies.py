@@ -18,7 +18,7 @@ def test_user_creation_with_timestamps(db: Session) -> None:
         email="timestamp@example.com",
         password="testpassword",
         first_name="Time",
-        last_name="Stamp"
+        last_name="Stamp",
     )
 
     # Act
@@ -40,7 +40,7 @@ def test_user_profile_fields_in_response(client: TestClient) -> None:
         "email": "profile@example.com",
         "password": "testpassword",
         "first_name": "Profile",
-        "last_name": "Test"
+        "last_name": "Test",
     }
 
     # Act - Register user
@@ -64,10 +64,7 @@ def test_user_profile_fields_in_response(client: TestClient) -> None:
 def test_minimal_user_registration(client: TestClient) -> None:
     """Test registration with only required fields"""
     # Arrange
-    user_data = {
-        "email": "minimal@example.com",
-        "password": "testpassword"
-    }
+    user_data = {"email": "minimal@example.com", "password": "testpassword"}
 
     # Act
     response = client.post("/api/v1/auth/register", json=user_data)
@@ -90,7 +87,7 @@ def test_user_me_endpoint_returns_profile_data(client: TestClient) -> None:
         "email": "metest@example.com",
         "password": "testpassword",
         "first_name": "Me",
-        "last_name": "Test"
+        "last_name": "Test",
     }
 
     register_response = client.post("/api/v1/auth/register", json=user_data)
@@ -146,7 +143,7 @@ def test_user_authentication_flow_complete(client: TestClient) -> None:
         "email": "flow@example.com",
         "password": "testpassword",
         "first_name": "Flow",
-        "last_name": "Test"
+        "last_name": "Test",
     }
 
     register_response = client.post("/api/v1/auth/register", json=user_data)
@@ -183,7 +180,7 @@ def test_user_with_partial_profile_data(client: TestClient) -> None:
     user_data = {
         "email": "partial@example.com",
         "password": "testpassword",
-        "first_name": "OnlyFirst"
+        "first_name": "OnlyFirst",
     }
 
     # Act
@@ -204,7 +201,7 @@ def test_timestamp_format_in_api_response(client: TestClient) -> None:
         "email": "timestamp@example.com",
         "password": "testpassword",
         "first_name": "Time",
-        "last_name": "Check"
+        "last_name": "Check",
     }
 
     # Act
@@ -219,7 +216,7 @@ def test_timestamp_format_in_api_response(client: TestClient) -> None:
     assert created_at_str is not None
 
     # Should be parseable as datetime
-    created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+    created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
     assert isinstance(created_at, datetime)
 
 

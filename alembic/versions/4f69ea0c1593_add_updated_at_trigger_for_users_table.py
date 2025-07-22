@@ -5,12 +5,13 @@ Revises: 6a10a7916097
 Create Date: 2025-07-22 21:25:48.842524
 
 """
-from alembic import op
+
+from alembic import op  # type: ignore[attr-defined]
 
 
 # revision identifiers, used by Alembic.
-revision = '4f69ea0c1593'
-down_revision = '6a10a7916097'
+revision = "4f69ea0c1593"
+down_revision = "6a10a7916097"
 branch_labels = None
 depends_on = None
 

@@ -12,7 +12,7 @@ def test_register_new_user(client: TestClient) -> None:
         "email": "newuser@example.com",
         "password": "testpassword",
         "first_name": "John",
-        "last_name": "Doe"
+        "last_name": "Doe",
     }
 
     # Act
@@ -132,7 +132,7 @@ def test_register_user_with_profile_fields(client: TestClient) -> None:
         "email": "profile@example.com",
         "password": "testpassword",
         "first_name": "Jane",
-        "last_name": "Smith"
+        "last_name": "Smith",
     }
 
     # Act
@@ -155,7 +155,7 @@ def test_register_user_partial_profile(client: TestClient) -> None:
     user_data = {
         "email": "partial@example.com",
         "password": "testpassword",
-        "first_name": "Only"
+        "first_name": "Only",
     }
 
     # Act
@@ -176,7 +176,7 @@ def test_response_includes_timestamps(client: TestClient) -> None:
         "email": "timestamps@example.com",
         "password": "testpassword",
         "first_name": "Timestamp",
-        "last_name": "Test"
+        "last_name": "Test",
     }
 
     # Act
@@ -190,7 +190,7 @@ def test_response_includes_timestamps(client: TestClient) -> None:
     assert "created_at" in data
     created_at_str = data["created_at"]
     # Should be able to parse as ISO datetime
-    created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+    created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
     assert isinstance(created_at, datetime)
 
     # updated_at and last_login_at should be None for new user

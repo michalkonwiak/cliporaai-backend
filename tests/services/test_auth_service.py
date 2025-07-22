@@ -18,7 +18,7 @@ def test_register_new_user(db: Session) -> None:
         email="newuser@example.com",
         password="testpassword",
         first_name="John",
-        last_name="Doe"
+        last_name="Doe",
     )
 
     # Act
@@ -124,7 +124,7 @@ def test_get_current_user_inactive_user(db: Session, test_user: User) -> None:
     token = auth_service.create_token(test_user)
 
     # Make the user inactive
-    test_user.is_active = False
+    test_user.is_active = False  # type: ignore[assignment]
     db.add(test_user)
     db.commit()
     db.refresh(test_user)
@@ -163,7 +163,7 @@ def test_register_user_with_profile_fields(db: Session) -> None:
         email="profile@example.com",
         password="testpassword",
         first_name="Jane",
-        last_name="Smith"
+        last_name="Smith",
     )
 
     # Act
@@ -190,6 +190,7 @@ def test_create_token_includes_user_id(db: Session, test_user: User) -> None:
 
     # Verify token contains user ID by decoding it
     from app.core.security import decode_access_token
+
     payload = decode_access_token(token.access_token)
     assert payload.get("sub") == str(test_user.id)
 
@@ -202,7 +203,7 @@ def test_get_current_user_with_profile_data(db: Session) -> None:
         email="userprofile@example.com",
         password="testpassword",
         first_name="Profile",
-        last_name="User"
+        last_name="User",
     )
     user = auth_service.register(user_data)
     token = auth_service.create_token(user)

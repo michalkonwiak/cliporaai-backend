@@ -16,7 +16,7 @@ def test_create_user(db: Session) -> None:
         email="newuser@example.com",
         password="testpassword",
         first_name="John",
-        last_name="Doe"
+        last_name="Doe",
     )
 
     # Act
@@ -100,7 +100,7 @@ def test_is_active(db: Session, test_user: User) -> None:
     # Assert
     assert is_active is True
 
-    test_user.is_active = False
+    test_user.is_active = False  # type: ignore[assignment]
     db.add(test_user)
     db.commit()
     db.refresh(test_user)
@@ -163,7 +163,7 @@ def test_user_profile_fields(db: Session) -> None:
         email="profile@example.com",
         password="testpassword",
         first_name="Jane",
-        last_name="Smith"
+        last_name="Smith",
     )
 
     # Act
