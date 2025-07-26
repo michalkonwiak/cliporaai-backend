@@ -66,7 +66,9 @@ class Video(Base):
     bitrate = Column(Integer, nullable=True)
 
     # AI Analysis results
-    status = Column(SqlEnum(VideoStatus, native_enum=False), default=VideoStatus.UPLOADING)
+    status = Column(
+        SqlEnum(VideoStatus, native_enum=False), default=VideoStatus.UPLOADING
+    )
     analysis_data = Column(JSON, default=dict)
 
     # AI Analysis components
@@ -89,8 +91,14 @@ class Video(Base):
     # Relationships
     project = relationship("Project", back_populates="videos")  # type: ignore
     user = relationship("User", back_populates="videos")  # type: ignore
-    cutting_plans = relationship("CuttingPlan", back_populates="video", cascade="all, delete-orphan")  # type: ignore
+    cutting_plans = relationship(
+        "CuttingPlan", back_populates="video", cascade="all, delete-orphan"
+    )  # type: ignore
 
     def __repr__(self) -> str:
-        status_value = self.status.value if self.status and hasattr(self.status, 'value') else "None"
+        status_value = (
+            self.status.value
+            if self.status and hasattr(self.status, "value")
+            else "None"
+        )
         return f"<Video(id={self.id}, filename={self.filename}, status={status_value})>"

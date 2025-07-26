@@ -1,5 +1,14 @@
 from typing import TYPE_CHECKING
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, Text, BigInteger
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    ForeignKey,
+    Float,
+    Text,
+    BigInteger,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Enum as SqlEnum
@@ -39,9 +48,19 @@ class ExportJob(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # Export settings
-    output_format = Column(SqlEnum(ExportFormat, native_enum=False), nullable=False, default=ExportFormat.MP4)
-    resolution = Column(String(20), nullable=False)  # "1920x1080", "1280x720", "3840x2160"
-    quality = Column(SqlEnum(ExportQuality, native_enum=False), nullable=False, default=ExportQuality.HIGH)
+    output_format = Column(
+        SqlEnum(ExportFormat, native_enum=False),
+        nullable=False,
+        default=ExportFormat.MP4,
+    )
+    resolution = Column(
+        String(20), nullable=False
+    )  # "1920x1080", "1280x720", "3840x2160"
+    quality = Column(
+        SqlEnum(ExportQuality, native_enum=False),
+        nullable=False,
+        default=ExportQuality.HIGH,
+    )
     fps = Column(Float, nullable=True)  # Target FPS for export
     bitrate = Column(Integer, nullable=True)  # Target bitrate in kbps
 
@@ -49,12 +68,18 @@ class ExportJob(Base):
     output_filename = Column(String(255), nullable=True)
     output_path = Column(String(500), nullable=True)
     output_size = Column(BigInteger, nullable=True)  # File size in bytes
-    download_url = Column(String(500), nullable=True)  # URL for downloading the exported file
+    download_url = Column(
+        String(500), nullable=True
+    )  # URL for downloading the exported file
 
     # Progress and status tracking
-    status = Column(SqlEnum(ExportStatus, native_enum=False), default=ExportStatus.QUEUED)
+    status = Column(
+        SqlEnum(ExportStatus, native_enum=False), default=ExportStatus.QUEUED
+    )
     progress = Column(Float, default=0.0)  # 0-100 percentage
-    current_step = Column(String(100), nullable=True)  # "analyzing", "cutting", "encoding", "finalizing"
+    current_step = Column(
+        String(100), nullable=True
+    )  # "analyzing", "cutting", "encoding", "finalizing"
 
     # Performance metrics
     processing_time = Column(Float, nullable=True)  # Total processing time in seconds
@@ -72,13 +97,19 @@ class ExportJob(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
-    expires_at = Column(DateTime(timezone=True), nullable=True)  # When the exported file expires
+    expires_at = Column(
+        DateTime(timezone=True), nullable=True
+    )  # When the exported file expires
 
     # Relationships
     cutting_plan = relationship("CuttingPlan", back_populates="export_jobs")  # type: ignore
 
     def __repr__(self) -> str:
-        status_value = self.status.value if self.status and hasattr(self.status, 'value') else "None"
+        status_value = (
+            self.status.value
+            if self.status and hasattr(self.status, "value")
+            else "None"
+        )
         return f"<ExportJob(id={self.id}, status={status_value}, progress={self.progress}%)>"
 
     @property
@@ -103,7 +134,7 @@ class ExportJob(Base):
             return "Unknown"
 
         size = float(self.output_size)
-        for unit in ['B', 'KB', 'MB', 'GB']:
+        for unit in ["B", "KB", "MB", "GB"]:
             if size < 1024.0:
                 return f"{size:.1f} {unit}"
             size /= 1024.0
@@ -114,11 +145,11 @@ class ExportJob(Base):
         """Extract width from resolution string"""
         if not self.resolution:
             return 0
-        return int(self.resolution.split('x')[0])
+        return int(self.resolution.split("x")[0])
 
     @property
     def resolution_height(self) -> int:
         """Extract height from resolution string"""
         if not self.resolution:
             return 0
-        return int(self.resolution.split('x')[1])
+        return int(self.resolution.split("x")[1])

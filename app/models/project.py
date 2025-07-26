@@ -38,17 +38,21 @@ class ProjectStatus(Enum):
 
 
 class Project(Base):
-    __tablename__ = 'projects'
+    __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
 
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="projects")  # type: ignore
 
-    project_type = Column(SqlEnum(ProjectType, native_enum=False), default=ProjectType.DYNAMIC)
-    status = Column(SqlEnum(ProjectStatus, native_enum=False), default=ProjectStatus.DRAFT)
+    project_type = Column(
+        SqlEnum(ProjectType, native_enum=False), default=ProjectType.DYNAMIC
+    )
+    status = Column(
+        SqlEnum(ProjectStatus, native_enum=False), default=ProjectStatus.DRAFT
+    )
 
     timeline_data = Column(JSON, nullable=True)
 
@@ -59,10 +63,17 @@ class Project(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
-    videos = relationship("Video", back_populates="project", cascade="all, delete-orphan")  # type: ignore
-    cutting_plans = relationship("CuttingPlan", back_populates="project", cascade="all, delete-orphan")  # type: ignore
-
+    videos = relationship(
+        "Video", back_populates="project", cascade="all, delete-orphan"
+    )  # type: ignore
+    cutting_plans = relationship(
+        "CuttingPlan", back_populates="project", cascade="all, delete-orphan"
+    )  # type: ignore
 
     def __repr__(self) -> str:
-        status_value = self.status.value if self.status and hasattr(self.status, 'value') else "None"
+        status_value = (
+            self.status.value
+            if self.status and hasattr(self.status, "value")
+            else "None"
+        )
         return f"<Project(id={self.id}, name={self.name}, status={status_value})>"
