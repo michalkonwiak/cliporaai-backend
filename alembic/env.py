@@ -11,7 +11,13 @@ from app.core.config import settings
 from app.db.base import Base
 
 # Import all models to ensure they are registered with Base.metadata
-from app.models.user import User  # noqa: F401
+from app.models import (  # noqa: F401
+    User,
+    Project,
+    Video,
+    CuttingPlan,
+    ExportJob,
+)
 
 config = context.config
 
