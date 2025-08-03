@@ -14,7 +14,7 @@ def get_logging_config() -> dict:
     Falls back to console-only logging if file logging is disabled or fails.
     """
     handlers: List[str] = ["console"]
-    
+
     # Configure handlers
     config_handlers = {
         "console": {
@@ -23,7 +23,7 @@ def get_logging_config() -> dict:
             "stream": sys.stdout,
         }
     }
-    
+
     if settings.enable_file_logging:
         config_handlers["file"] = {
             "class": "logging.handlers.RotatingFileHandler",
@@ -33,7 +33,7 @@ def get_logging_config() -> dict:
             "backupCount": 5,
         }
         handlers.append("file")
-    
+
     return {
         "version": 1,
         "disable_existing_loggers": False,
@@ -62,21 +62,21 @@ def setup_logging() -> None:
             if not os.path.isabs(log_file_path):
                 # If it's a relative path, make it absolute from the project root
                 log_file_path = os.path.join(
-                    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-                    log_file_path
+                    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                    log_file_path,
                 )
-            
+
             log_dir = os.path.dirname(log_file_path)
             os.makedirs(log_dir, exist_ok=True)
-            
-            with open(log_file_path, 'a'):
+
+            with open(log_file_path, "a"):
                 pass
-                
+
         except (OSError, PermissionError) as e:
             print(f"Warning: Could not access log file: {e}")
             print("Falling back to console-only logging")
             # Disable file logging if there's an error
             settings.enable_file_logging = False
-    
+
     logging_config = get_logging_config()
     dictConfig(logging_config)
