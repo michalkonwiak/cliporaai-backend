@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int
 
     log_level: str = "INFO"
+    log_file_path: str = "logs/app.log"
+    enable_file_logging: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
