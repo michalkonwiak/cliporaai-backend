@@ -9,6 +9,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      localstack:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
@@ -56,9 +58,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      
+  localstack:
+    image: localstack/localstack:latest
+    container_name: cliporaai-localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - PERSISTENCE=1
+      - AWS_DEFAULT_REGION=us-east-1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ./localstack-init:/docker-entrypoint-initaws.d
+      - localstack-data:/var/lib/localstack/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
+  localstack-data:
 
 networks:
   default:

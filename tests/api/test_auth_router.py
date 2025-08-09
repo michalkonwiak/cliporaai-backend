@@ -1,13 +1,15 @@
-# ruff: noqa: S101, S105
 from datetime import datetime
-from fastapi.testclient import TestClient
+import pytest
+import httpx
 
 from app.models.user import User
+from pytest import mark
 
 
-def test_register_new_user(client: TestClient) -> None:
+@mark.asyncio
+async def test_register_new_user(client: httpx.AsyncClient) -> None:
     """Test registering a new user via the API"""
-    # Arrange
+    import json
     user_data = {
         "email": "newuser@example.com",
         "password": "testpassword",
@@ -15,8 +17,19 @@ def test_register_new_user(client: TestClient) -> None:
         "last_name": "Doe",
     }
 
-    # Act
-    response = client.post("/api/v1/auth/register", json=user_data)
+    # Act - Try with content parameter and explicit content-type header
+    headers = {"Content-Type": "application/json"}
+    response = await client.post(
+        "/api/v1/auth/register", 
+        content=json.dumps(user_data).encode('utf-8'),
+        headers=headers
+    )
+    
+    # Print response for debugging
+    print(f"Response status: {response.status_code}")
+    print(f"Response content: {response.content.decode()}")
+    print(f"Response headers: {response.headers}")
+    print(f"Request headers: {headers}")
 
     # Assert
     assert response.status_code == 201
@@ -32,13 +45,14 @@ def test_register_new_user(client: TestClient) -> None:
     assert data["last_login_at"] is None
 
 
-def test_register_existing_email(client: TestClient, test_user: User) -> None:
+@pytest.mark.asyncio
+async def test_register_existing_email(client: httpx.AsyncClient, test_user: User) -> None:
     """Test registering a user with an existing email via the API"""
     # Arrange
     user_data = {"email": test_user.email, "password": "testpassword"}
 
     # Act
-    response = client.post("/api/v1/auth/register", json=user_data)
+    response = await client.post("/api/v1/auth/register", json=user_data)
 
     # Assert
     assert response.status_code == 400
@@ -46,13 +60,14 @@ def test_register_existing_email(client: TestClient, test_user: User) -> None:
     assert "Email already registered" in data["detail"]
 
 
-def test_login_valid_credentials(client: TestClient, test_user: User) -> None:
+@pytest.mark.asyncio
+async def test_login_valid_credentials(client: httpx.AsyncClient, test_user: User) -> None:
     """Test logging in with valid credentials via the API"""
     # Arrange
     login_data = {"username": test_user.email, "password": "password123"}
 
     # Act
-    response = client.post("/api/v1/auth/login", data=login_data)
+    response = await client.post("/api/v1/auth/login", data=login_data)
 
     # Assert
     assert response.status_code == 200
@@ -61,13 +76,14 @@ def test_login_valid_credentials(client: TestClient, test_user: User) -> None:
     assert data["token_type"] == "bearer"
 
 
-def test_login_invalid_credentials(client: TestClient) -> None:
+@pytest.mark.asyncio
+async def test_login_invalid_credentials(client: httpx.AsyncClient) -> None:
     """Test logging in with invalid credentials via the API"""
     # Arrange
     login_data = {"username": "nonexistent@example.com", "password": "wrongpassword"}
 
     # Act
-    response = client.post("/api/v1/auth/login", data=login_data)
+    response = await client.post("/api/v1/auth/login", data=login_data)
 
     # Assert
     assert response.status_code == 401
@@ -75,10 +91,11 @@ def test_login_invalid_credentials(client: TestClient) -> None:
     assert "Incorrect email or password" in data["detail"]
 
 
-def test_get_current_user(client: TestClient, token_headers: dict) -> None:
+@pytest.mark.asyncio
+async def test_get_current_user(client: httpx.AsyncClient, token_headers: dict) -> None:
     """Test getting the current user via the API"""
     # Act
-    response = client.get("/api/v1/auth/me", headers=token_headers)
+    response = await client.get("/api/v1/auth/me", headers=token_headers)
 
     # Assert
     assert response.status_code == 200
@@ -92,10 +109,11 @@ def test_get_current_user(client: TestClient, token_headers: dict) -> None:
     assert "last_login_at" in data  # May be None or have a value
 
 
-def test_get_current_user_no_token(client: TestClient) -> None:
+@pytest.mark.asyncio
+async def test_get_current_user_no_token(client: httpx.AsyncClient) -> None:
     """Test getting the current user without a token via the API"""
     # Act
-    response = client.get("/api/v1/auth/me")
+    response = await client.get("/api/v1/auth/me")
 
     # Assert
     assert response.status_code == 401
@@ -103,13 +121,14 @@ def test_get_current_user_no_token(client: TestClient) -> None:
     assert "Not authenticated" in data["detail"]
 
 
-def test_register_user_minimal_data(client: TestClient) -> None:
+@pytest.mark.asyncio
+async def test_register_user_minimal_data(client: httpx.AsyncClient) -> None:
     """Test registering a user with only required fields via the API"""
     # Arrange
     user_data = {"email": "minimal@example.com", "password": "testpassword"}
 
     # Act
-    response = client.post("/api/v1/auth/register", json=user_data)
+    response = await client.post("/api/v1/auth/register", json=user_data)
 
     # Assert
     assert response.status_code == 201
@@ -125,7 +144,8 @@ def test_register_user_minimal_data(client: TestClient) -> None:
     assert data["last_login_at"] is None
 
 
-def test_register_user_with_profile_fields(client: TestClient) -> None:
+@pytest.mark.asyncio
+async def test_register_user_with_profile_fields(client: httpx.AsyncClient) -> None:
     """Test registering a user with profile information via the API"""
     # Arrange
     user_data = {
@@ -136,7 +156,7 @@ def test_register_user_with_profile_fields(client: TestClient) -> None:
     }
 
     # Act
-    response = client.post("/api/v1/auth/register", json=user_data)
+    response = await client.post("/api/v1/auth/register", json=user_data)
 
     # Assert
     assert response.status_code == 201
@@ -149,7 +169,8 @@ def test_register_user_with_profile_fields(client: TestClient) -> None:
     assert data["is_superuser"] is False
 
 
-def test_register_user_partial_profile(client: TestClient) -> None:
+@pytest.mark.asyncio
+async def test_register_user_partial_profile(client: httpx.AsyncClient) -> None:
     """Test registering a user with only first name via the API"""
     # Arrange
     user_data = {
@@ -159,7 +180,7 @@ def test_register_user_partial_profile(client: TestClient) -> None:
     }
 
     # Act
-    response = client.post("/api/v1/auth/register", json=user_data)
+    response = await client.post("/api/v1/auth/register", json=user_data)
 
     # Assert
     assert response.status_code == 201
@@ -169,7 +190,8 @@ def test_register_user_partial_profile(client: TestClient) -> None:
     assert data["last_name"] is None
 
 
-def test_response_includes_timestamps(client: TestClient) -> None:
+@pytest.mark.asyncio
+async def test_response_includes_timestamps(client: httpx.AsyncClient) -> None:
     """Test that user registration response includes proper timestamps"""
     # Arrange
     user_data = {
@@ -180,7 +202,7 @@ def test_response_includes_timestamps(client: TestClient) -> None:
     }
 
     # Act
-    response = client.post("/api/v1/auth/register", json=user_data)
+    response = await client.post("/api/v1/auth/register", json=user_data)
 
     # Assert
     assert response.status_code == 201

@@ -1,19 +1,19 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+import enum
 from sqlalchemy import (
     Column,
     Integer,
     String,
     Text,
     ForeignKey,
-    Float,
     DateTime,
+    Float,
     JSON,
+    Enum,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from sqlalchemy.types import Enum as SqlEnum
-
-from enum import Enum
+from sqlalchemy import text
+from datetime import datetime
 
 from app.db.base import Base
 
@@ -21,59 +21,57 @@ if TYPE_CHECKING:
     pass
 
 
-class ProjectType(Enum):
-    DYNAMIC = "dynamic"
-    CINEMATIC = "cinematic"
-    DOCUMENTARY = "documentary"
-    SOCIAL = "social"
-    CUSTOM = "custom"
+class ProjectType(str, enum.Enum):
+    DYNAMIC = "DYNAMIC"
+    CINEMATIC = "CINEMATIC"
+    DOCUMENTARY = "DOCUMENTARY"
+    SOCIAL = "SOCIAL"
+    CUSTOM = "CUSTOM"
 
 
-class ProjectStatus(Enum):
-    DRAFT = "draft"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    EXPORTED = "exported"
+class ProjectStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    EXPORTED = "EXPORTED"
 
 
 class Project(Base):
     __tablename__ = "projects"
+    __allow_unmapped__ = True
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    user = relationship("User", back_populates="projects")  # type: ignore
 
-    project_type = Column(
-        SqlEnum(ProjectType, native_enum=False), default=ProjectType.DYNAMIC
-    )
-    status = Column(
-        SqlEnum(ProjectStatus, native_enum=False), default=ProjectStatus.DRAFT
-    )
-
+    # Project configuration
+    project_type = Column(Enum(ProjectType, native_enum=False), nullable=True)
+    status = Column(Enum(ProjectStatus, native_enum=False), nullable=True)
     timeline_data = Column(JSON, nullable=True)
+    total_duration = Column(Float, nullable=True)
+    processing_progress = Column(Float, nullable=True)
 
-    total_duration = Column(Float, default=0.0)
-    processing_progress = Column(Float, default=0.0)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at = Column(DateTime(timezone=True), onupdate=datetime.utcnow)
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
-    videos = relationship(
+    # Relationships
+    user: Any = relationship("User", back_populates="projects")
+    videos: Any = relationship(
         "Video", back_populates="project", cascade="all, delete-orphan"
-    )  # type: ignore
-    cutting_plans = relationship(
+    )
+    audios: Any = relationship(
+        "Audio", back_populates="project", cascade="all, delete-orphan"
+    )
+    cutting_plans: Any = relationship(
         "CuttingPlan", back_populates="project", cascade="all, delete-orphan"
-    )  # type: ignore
+    )
+    export_jobs: Any = relationship(
+        "ExportJob", back_populates="project", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
-        status_value = (
-            self.status.value
-            if self.status and hasattr(self.status, "value")
-            else "None"
-        )
-        return f"<Project(id={self.id}, name={self.name}, status={status_value})>"
+        return f"<Project(id={self.id}, name='{self.name}', status={self.status})>"

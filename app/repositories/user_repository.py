@@ -1,4 +1,6 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from typing import Optional, cast
 
 from app.core.security import hash_password
 from app.models.user import User
@@ -11,35 +13,30 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
     Repository for User model with custom methods for user-specific operations
     """
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         super().__init__(User, db)
 
-    def get_by_email(self, email: str) -> User | None:
-        """
-        Get a user by email
-        """
-        return self.db.query(User).filter(User.email == email).first()
+    async def get_by_email(self, email: str) -> User | None:
+        """Get a user by email."""
+        result = await self.db.execute(select(User).where(User.email == email))
+        return cast(Optional[User], result.scalar_one_or_none())
 
-    def create_user(self, user_in: UserCreate) -> User:
-        """
-        Create a new user with hashed password
-        """
+    async def create_user(self, user_in: UserCreate) -> User:
+        """Create a new user with hashed password."""
         user_data = user_in.model_dump(exclude={"password"})
         db_user = User(**user_data, hashed_password=hash_password(user_in.password))
         self.db.add(db_user)
-        self.db.commit()
-        self.db.refresh(db_user)
+        await self.db.commit()
+        await self.db.refresh(db_user)
         return db_user
 
-    def update_password(self, user: User, new_password: str) -> User:
-        """
-        Update user's password
-        """
+    async def update_password(self, user: User, new_password: str) -> User:
+        """Update user's password."""
         hashed_password = hash_password(new_password)
-        user.hashed_password = hashed_password  # type: ignore[assignment]
+        user.hashed_password = hashed_password
         self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        await self.db.commit()
+        await self.db.refresh(user)
         return user
 
     def is_active(self, user: User) -> bool:

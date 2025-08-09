@@ -1,37 +1,43 @@
 import os
 import sys
+from pathlib import Path
 from logging.config import fileConfig
+from dotenv import load_dotenv
+
+# Add project root to sys.path
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from sqlalchemy import engine_from_config, pool
 
-from alembic import context  # type: ignore
+from alembic import context
 
-sys.path.append(os.getcwd())
-from app.core.config import settings
-from app.db.base import Base
+# Load environment variables from .env file
+load_dotenv()
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
+if context.config.config_file_name is not None:
+    fileConfig(context.config.config_file_name)
+
+from app.db.base import Base  # noqa: E402
 
 # Import all models to ensure they are registered with Base.metadata
-from app.models import (  # noqa: F401
+from app.models import (  # noqa: F401, E402
     User,
     Project,
     Video,
     CuttingPlan,
     ExportJob,
+    Audio,
 )
 
 config = context.config
 
+# Set the SQLAlchemy URL from environment variables
 config.set_main_option(
     "sqlalchemy.url",
-    f"postgresql://{settings.postgres_user}:"
-    f"{settings.postgres_password}@"
-    f"{settings.postgres_host}:"
-    f"{settings.postgres_port}/"
-    f"{settings.postgres_db}",
+    f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}",
 )
-
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
 

@@ -4,6 +4,7 @@ from logging.config import dictConfig
 from typing import List
 
 from app.core.config import settings
+from app.core.json_logging import JsonFormatter
 
 LOG_LEVEL = settings.log_level
 
@@ -12,6 +13,7 @@ def get_logging_config() -> dict:
     """
     Generate logging configuration based on settings.
     Falls back to console-only logging if file logging is disabled or fails.
+    Includes configuration for uvicorn access logs to ensure request_id correlation.
     """
     handlers: List[str] = ["console"]
 
@@ -19,7 +21,7 @@ def get_logging_config() -> dict:
     config_handlers = {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "default",
+            "formatter": "json",
             "stream": sys.stdout,
         }
     }
@@ -27,7 +29,7 @@ def get_logging_config() -> dict:
     if settings.enable_file_logging:
         config_handlers["file"] = {
             "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "default",
+            "formatter": "json",
             "filename": settings.log_file_path,
             "maxBytes": 10 * 1024 * 1024,
             "backupCount": 5,
@@ -41,8 +43,32 @@ def get_logging_config() -> dict:
             "default": {
                 "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s",
             },
+            "json": {
+                "()": JsonFormatter,
+                "application": "cliporaai-backend",
+                "environment": settings.environment,
+            },
+            "access_json": {
+                "()": JsonFormatter,
+                "application": "cliporaai-backend",
+                "environment": settings.environment,
+                "log_type": "access",
+            },
         },
         "handlers": config_handlers,
+        "loggers": {
+            "uvicorn": {
+                "handlers": handlers,
+                "level": LOG_LEVEL,
+                "propagate": False,
+            },
+            "uvicorn.access": {
+                "handlers": handlers,
+                "level": LOG_LEVEL,
+                "propagate": False,
+                "formatter": "access_json",
+            },
+        },
         "root": {
             "handlers": handlers,
             "level": LOG_LEVEL,

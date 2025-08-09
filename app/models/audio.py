@@ -16,14 +16,14 @@ from sqlalchemy import text
 from datetime import datetime
 
 from app.db.base import Base
-from app.domain.enums import VideoCodec, VideoStatus
+from app.domain.enums import AudioCodec, AudioStatus
 
 if TYPE_CHECKING:
     pass
 
 
-class Video(Base):
-    __tablename__ = "videos"
+class Audio(Base):
+    __tablename__ = "audios"
     __allow_unmapped__ = True
 
     id = Column(Integer, primary_key=True, index=True)
@@ -33,7 +33,7 @@ class Video(Base):
     description = Column(String, nullable=True)
 
     # Foreign keys
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     # File properties
@@ -41,25 +41,21 @@ class Video(Base):
     file_size = Column(BigInteger, nullable=False)
     mime_type = Column(String(100), nullable=False)
 
-    # Video properties
+    # Audio properties
     duration = Column(Float, nullable=False)
-    width = Column(Integer, nullable=False)
-    height = Column(Integer, nullable=False)
-    fps = Column(Float, nullable=False)
-    codec = Column(Enum(VideoCodec, native_enum=False), nullable=False)
+    codec = Column(Enum(AudioCodec, native_enum=False), nullable=False)
     bitrate = Column(Integer, nullable=True)
+    sample_rate = Column(Integer, nullable=False)
+    channels = Column(Integer, nullable=False)
 
     # Processing status
-    status = Column(Enum(VideoStatus, native_enum=False), nullable=True)
+    status = Column(Enum(AudioStatus, native_enum=False), nullable=True)
 
     # Analysis data
     analysis_data = Column(JSON, nullable=True)
-    scene_cuts = Column(JSON, nullable=True)
-    audio_analysis = Column(JSON, nullable=True)
-    face_detections = Column(JSON, nullable=True)
-    emotion_analysis = Column(JSON, nullable=True)
-    text_detections = Column(JSON, nullable=True)
-    object_detections = Column(JSON, nullable=True)
+    transcription = Column(Text, nullable=True)
+    silence_detection = Column(JSON, nullable=True)
+    volume_analysis = Column(JSON, nullable=True)
 
     # Processing metadata
     processing_time = Column(Float, nullable=True)
@@ -71,8 +67,8 @@ class Video(Base):
     analyzed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user: Any = relationship("User", back_populates="videos")
-    project: Any = relationship("Project", back_populates="videos")
+    user: Any = relationship("User", back_populates="audios")
+    project: Any = relationship("Project", back_populates="audios")
 
     def __repr__(self) -> str:
-        return f"<Video(id={self.id}, filename='{self.filename}', status={self.status})>"
+        return f"<Audio(id={self.id}, filename='{self.filename}', status={self.status})>"

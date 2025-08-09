@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
-from sqlalchemy import Boolean, Column, Integer, String, DateTime
+from datetime import datetime
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, text
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 
 from app.db.base import Base
 
@@ -23,12 +23,13 @@ class User(Base):
     last_name = Column(String(100), nullable=True)
 
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at = Column(DateTime(timezone=True), onupdate=datetime.utcnow)
     last_login_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     videos = relationship("Video", back_populates="user", cascade="all, delete-orphan")  # type: ignore
+    audios = relationship("Audio", back_populates="user", cascade="all, delete-orphan")  # type: ignore
     projects = relationship(
         "Project", back_populates="user", cascade="all, delete-orphan"
     )  # type: ignore

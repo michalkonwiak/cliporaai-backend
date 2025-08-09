@@ -1,65 +1,77 @@
 import logging
-from collections.abc import Generator
-from typing import Dict, Any
-from datetime import datetime
+from typing import Dict, Any, AsyncGenerator, cast
+from datetime import datetime, timezone
 
-import redis
+import redis.asyncio as redis
+import aioboto3
 
-from fastapi import Depends, HTTPException, status, Security
+from fastapi import Depends, HTTPException, status, Security, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
-from app.core.config import settings
 from app.core.exceptions import credentials_exception, TokenExpiredError
 from app.core.security import decode_access_token
 
-from app.db.session import SessionLocal
+from app.db.session import get_async_session
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
 
 # Security scheme for JWT authentication
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
-def get_db() -> Generator[Session]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    Dependency function to get a database session.
-    Yields a SQLAlchemy session and ensures it's closed after use.
+    Dependency function to get an async database session.
+    Yields an AsyncSession and ensures it's closed after use.
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    async for session in get_async_session():
+        yield session
 
 
-def get_redis_client() -> Generator[redis.Redis]:
+async def get_redis_client(request: Request) -> redis.Redis:
     """
     Dependency function to get a Redis client.
-    Yields a Redis client with connection parameters from settings.
+    Uses the singleton client from app.state.
+    Raises 503 error if Redis client is not available.
+    
+    Returns:
+        A redis.asyncio.Redis client instance
     """
-    try:
-        redis_client = redis.Redis(
-            host=settings.redis_host,
-            port=settings.redis_port,
-            socket_connect_timeout=5,
-        )
-        yield redis_client
-    finally:
-        # Redis connections are automatically closed when the client object is garbage collected
-        pass
+    if not hasattr(request.app.state, "redis_client"):
+        raise HTTPException(status_code=503, detail="Redis client not ready")
+    return cast(redis.Redis, request.app.state.redis_client)
+
+
+async def get_s3_client(request: Request) -> "aioboto3.client.S3":
+    """
+    Dependency function to get an S3 client.
+    Uses the singleton client from app.state.
+    Raises 503 error if S3 client is not available.
+    
+    Returns:
+        An aioboto3 S3 client instance
+    """
+    if not hasattr(request.app.state, "s3_client"):
+        raise HTTPException(status_code=503, detail="S3 client not ready")
+    return request.app.state.s3_client
 
 
 # Authentication dependencies
 
 
 async def get_current_user_token(
-    credentials: HTTPAuthorizationCredentials = Security(security),
+    credentials: HTTPAuthorizationCredentials | None = Security(security),
 ) -> str:
     """Extract JWT token from Authorization header"""
-    if not credentials:
-        raise credentials_exception
+    if not credentials or not credentials.credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return str(credentials.credentials)
 
 
@@ -71,9 +83,8 @@ async def verify_token(token: str = Depends(get_current_user_token)) -> Dict[str
         if user_id is None:
             raise credentials_exception
 
-        exp = payload.get("exp")
-        if exp and datetime.utcnow().timestamp() > exp:
-            raise TokenExpiredError("Token has expired")
+        # Token validation is now handled in decode_access_token
+        # including expiration check with leeway
 
         return payload
     except TokenExpiredError:
@@ -85,14 +96,17 @@ async def verify_token(token: str = Depends(get_current_user_token)) -> Dict[str
 
 
 async def get_current_user(
-    db: Session = Depends(get_db), token_payload: Dict[str, Any] = Depends(verify_token)
+    db: AsyncSession = Depends(get_db), token_payload: Dict[str, Any] = Depends(verify_token)
 ) -> User:
     """Get current authenticated user from token"""
     user_id = token_payload.get("sub")
     if not user_id:
         raise credentials_exception
 
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    # Use SQLAlchemy ORM 2.0 style
+    result = await db.execute(select(User).where(User.id == int(user_id)))
+    user: User | None = result.scalar_one_or_none()
+    
     if user is None:
         raise credentials_exception
 
@@ -101,10 +115,11 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
 
-    # Update last login
-    user.last_login_at = datetime.utcnow()  # type: ignore[assignment]
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    # Update last_login_at with timezone-aware datetime
+    now = datetime.now(timezone.utc)
+    if not user.last_login_at or (now - user.last_login_at).total_seconds() > 900:  # 15 minutes
+        user.last_login_at = now
+        await db.commit()
+        await db.refresh(user)
 
     return user

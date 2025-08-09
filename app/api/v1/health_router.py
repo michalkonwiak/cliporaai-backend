@@ -1,12 +1,11 @@
 import logging
-from typing import NotRequired, TypedDict
+from typing import NotRequired, TypedDict, Any
 
-import redis
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import text
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_db, get_redis_client
+from app.dependencies import get_db, get_redis_client, get_s3_client
 
 
 class ServiceStatus(TypedDict):
@@ -18,6 +17,7 @@ class Services(TypedDict):
     app: ServiceStatus
     database: ServiceStatus
     redis: ServiceStatus
+    localstack: ServiceStatus
 
 
 class HealthStatus(TypedDict):
@@ -30,24 +30,28 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=HealthStatus)
-def health_check(
-    db: Session = Depends(get_db),
-    redis_client: redis.Redis = Depends(get_redis_client),
+async def health_check(
+    db: AsyncSession = Depends(get_db),
+    redis_client: Any = Depends(get_redis_client),
+    s3_client: Any = Depends(get_s3_client),
 ) -> HealthStatus:
     """
     Comprehensive health check endpoint that verifies the status of:
     - Database connection
     - Redis connection
+    - LocalStack (S3) connection
     - Application itself
     """
     app_status: ServiceStatus = {"status": "ok"}
     database_status: ServiceStatus = {"status": "ok"}
     redis_status: ServiceStatus = {"status": "ok"}
+    localstack_status: ServiceStatus = {"status": "ok"}
 
     services: Services = {
         "app": app_status,
         "database": database_status,
         "redis": redis_status,
+        "localstack": localstack_status,
     }
 
     health_status: HealthStatus = {
@@ -58,7 +62,7 @@ def health_check(
     # Check database connection
     try:
         # Execute a simple query to check database connectivity
-        db.execute(text("SELECT 1"))
+        await db.execute(text("SELECT 1"))
         logger.debug("Database health check passed")
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
@@ -68,8 +72,7 @@ def health_check(
 
     # Check Redis connection
     try:
-        # Ping Redis to check connectivity
-        if not redis_client.ping():
+        if not await redis_client.ping():
             raise Exception("Redis ping failed")
         logger.debug("Redis health check passed")
     except Exception as e:
@@ -77,8 +80,18 @@ def health_check(
         redis_status["status"] = "error"
         redis_status["error"] = str(e)
         health_status["status"] = "error"
+        
+    # Check LocalStack (S3) connection
+    try:
+        from app.core.config import settings
+        await s3_client.head_bucket(Bucket=settings.s3_bucket_name)
+        logger.debug(f"LocalStack health check passed for bucket: {settings.s3_bucket_name}")
+    except Exception as e:
+        logger.error(f"LocalStack health check failed: {e}")
+        localstack_status["status"] = "error"
+        localstack_status["error"] = str(e)
+        health_status["status"] = "error"
 
-    # If any service is down, return a 503 Service Unavailable status
     if health_status["status"] == "error":
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -86,3 +99,20 @@ def health_check(
         )
 
     return health_status
+
+
+
+@router.get("/live")
+async def live() -> dict[str, str]:
+    """Liveness probe: lightweight and always OK if the app is running."""
+    return {"status": "ok"}
+
+
+@router.get("/ready", response_model=HealthStatus)
+async def ready(
+    db: AsyncSession = Depends(get_db),
+    redis_client: Any = Depends(get_redis_client),
+    s3_client: Any = Depends(get_s3_client),
+) -> HealthStatus:
+    """Readiness probe: reuse full health check to ensure dependencies are ready."""
+    return await health_check(db=db, redis_client=redis_client, s3_client=s3_client)
