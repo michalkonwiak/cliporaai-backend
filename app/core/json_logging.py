@@ -1,8 +1,8 @@
 import json
 import logging
 import traceback
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 
 class JsonFormatter(logging.Formatter):
@@ -22,8 +22,8 @@ class JsonFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """Format the log record as JSON."""
-        log_data: Dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+        log_data: dict[str, Any] = {
+            "timestamp": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "name": record.name,
             "message": record.getMessage(),
@@ -74,7 +74,7 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(log_data)
 
 
-def setup_json_logging(logger: Optional[logging.Logger] = None) -> None:
+def setup_json_logging(logger: logging.Logger | None = None) -> None:
     """
     Set up JSON logging for the specified logger or the root logger.
     

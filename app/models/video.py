@@ -1,19 +1,20 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
+
 from sqlalchemy import (
+    JSON,
+    BigInteger,
     Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
     Integer,
     String,
     Text,
-    ForeignKey,
-    DateTime,
-    Float,
-    JSON,
-    Enum,
-    BigInteger,
+    text,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy import text
-from datetime import datetime
 
 from app.db.base import Base
 from app.domain.enums import VideoCodec, VideoStatus

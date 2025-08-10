@@ -1,12 +1,13 @@
 # ruff: noqa: S101
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-from unittest.mock import MagicMock, patch, AsyncMock
 
-from app.models.video import Video, VideoStatus, VideoCodec
-from app.schemas.file import VideoCreate, FileUpdate
+from app.models.video import Video, VideoCodec, VideoStatus
+from app.schemas.file import FileUpdate, VideoCreate
 from app.services.video_service import VideoService
 
 

@@ -1,9 +1,10 @@
 from datetime import datetime
-import pytest
+
 import httpx
+import pytest
+from pytest import mark
 
 from app.models.user import User
-from pytest import mark
 
 
 @mark.asyncio

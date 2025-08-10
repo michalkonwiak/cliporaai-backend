@@ -1,9 +1,10 @@
 # ruff: noqa: S101
 from datetime import datetime
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.audio import Audio, AudioStatus, AudioCodec
+from app.models.audio import Audio, AudioCodec, AudioStatus
 from app.repositories.audio_repository import AudioRepository
 from app.schemas.file import AudioCreate, FileUpdate
 

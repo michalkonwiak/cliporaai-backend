@@ -1,12 +1,12 @@
 import logging
-from typing import List, Optional, cast
+from typing import cast
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_current_user, get_db
+from app.domain.enums import AudioCodec, VideoCodec
 from app.models.user import User
-from app.domain.enums import VideoCodec, AudioCodec
 from app.schemas.file import (
     AudioCreate,
     AudioRead,
@@ -17,8 +17,8 @@ from app.schemas.file import (
     VideoCreate,
     VideoRead,
 )
-from app.services.video_service import VideoService
 from app.services.audio_service import AudioService
+from app.services.video_service import VideoService
 
 router = APIRouter(prefix="/files", tags=["files"])
 logger = logging.getLogger(__name__)
@@ -27,8 +27,8 @@ logger = logging.getLogger(__name__)
 @router.post("/videos/upload", response_model=FileUploadResponse, status_code=status.HTTP_201_CREATED)
 async def upload_video(
     project_id: int = Form(...),
-    title: Optional[str] = Form(None),
-    description: Optional[str] = Form(None),
+    title: str | None = Form(None),
+    description: str | None = Form(None),
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -67,8 +67,8 @@ async def upload_video(
 @router.post("/audios/upload", response_model=FileUploadResponse, status_code=status.HTTP_201_CREATED)
 async def upload_audio(
     project_id: int = Form(...),
-    title: Optional[str] = Form(None),
-    description: Optional[str] = Form(None),
+    title: str | None = Form(None),
+    description: str | None = Form(None),
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -104,12 +104,12 @@ async def upload_audio(
     )
 
 
-@router.get("/videos", response_model=List[VideoRead])
+@router.get("/videos", response_model=list[VideoRead])
 async def list_videos(
-    project_id: Optional[int] = None,
+    project_id: int | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> List[VideoRead]:
+) -> list[VideoRead]:
     """
     List videos.
     
@@ -119,19 +119,19 @@ async def list_videos(
     video_service = VideoService(db)
     
     if project_id is not None:
-        videos = cast(List[VideoRead], await video_service.get_videos_by_project(project_id, current_user.id))
+        videos = cast(list[VideoRead], await video_service.get_videos_by_project(project_id, current_user.id))
     else:
-        videos = cast(List[VideoRead], await video_service.get_videos_by_user(current_user.id))
+        videos = cast(list[VideoRead], await video_service.get_videos_by_user(current_user.id))
     
     return videos
 
 
-@router.get("/audios", response_model=List[AudioRead])
+@router.get("/audios", response_model=list[AudioRead])
 async def list_audios(
-    project_id: Optional[int] = None,
+    project_id: int | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> List[AudioRead]:
+) -> list[AudioRead]:
     """
     List audios.
     
@@ -141,9 +141,9 @@ async def list_audios(
     audio_service = AudioService(db)
     
     if project_id is not None:
-        audios = cast(List[AudioRead], await audio_service.get_audios_by_project(project_id, current_user.id))
+        audios = cast(list[AudioRead], await audio_service.get_audios_by_project(project_id, current_user.id))
     else:
-        audios = cast(List[AudioRead], await audio_service.get_audios_by_user(current_user.id))
+        audios = cast(list[AudioRead], await audio_service.get_audios_by_user(current_user.id))
     
     return audios
 
@@ -213,7 +213,7 @@ async def delete_video(
     """
     video_service = VideoService(db)
     await video_service.delete_video(video_id, current_user.id)
-    return None
+    return
 
 
 @router.delete("/audios/{audio_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -227,4 +227,4 @@ async def delete_audio(
     """
     audio_service = AudioService(db)
     await audio_service.delete_audio(audio_id, current_user.id)
-    return None
+    return

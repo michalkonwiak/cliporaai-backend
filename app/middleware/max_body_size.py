@@ -1,11 +1,10 @@
-import logging
 import json
-from typing import Callable, Awaitable
+import logging
+from collections.abc import Awaitable, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
-
 
 logger = logging.getLogger(__name__)
 

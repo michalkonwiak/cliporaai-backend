@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional
 
 from pydantic import BaseModel, field_serializer
 
@@ -25,7 +24,7 @@ class ProjectBase(BaseModel):
     """Base schema for project metadata."""
     
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     project_type: str = ProjectType.DYNAMIC.value
 
 
@@ -42,10 +41,10 @@ class ProjectRead(ProjectBase):
     status: str
     total_duration: float
     processing_progress: float
-    timeline_data: Optional[Dict] = None
+    timeline_data: dict | None = None
     created_at: datetime
-    updated_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    updated_at: datetime | None = None
+    completed_at: datetime | None = None
 
     @staticmethod
     def _to_lower_str(value: object) -> str:
@@ -65,7 +64,7 @@ class ProjectRead(ProjectBase):
 class ProjectUpdate(BaseModel):
     """Schema for updating project metadata."""
     
-    name: Optional[str] = None
-    description: Optional[str] = None
-    project_type: Optional[str] = None
-    timeline_data: Optional[Dict] = None
+    name: str | None = None
+    description: str | None = None
+    project_type: str | None = None
+    timeline_data: dict | None = None

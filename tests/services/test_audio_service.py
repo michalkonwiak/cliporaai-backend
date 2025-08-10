@@ -1,13 +1,14 @@
 # ruff: noqa: S101
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-from unittest.mock import MagicMock, patch, AsyncMock
 
-from app.models.audio import Audio, AudioStatus, AudioCodec
-from app.models.user import User
+from app.models.audio import Audio, AudioCodec, AudioStatus
 from app.models.project import Project
+from app.models.user import User
 from app.schemas.file import AudioCreate, FileUpdate
 from app.services.audio_service import AudioService
 

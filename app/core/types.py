@@ -1,5 +1,6 @@
 """Type definitions for the application."""
-from typing import Protocol, Any
+from typing import Any, Protocol
+
 import redis.asyncio as redis
 
 try:

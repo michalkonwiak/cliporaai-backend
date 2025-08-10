@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
-from sqlalchemy import Boolean, Column, Integer, String, DateTime, text
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, text
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base

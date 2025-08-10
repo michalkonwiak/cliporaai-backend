@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Any
+from typing import Any
 
 from fastapi import Request, Response
 from slowapi import Limiter
@@ -10,7 +10,7 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
-def get_limiter(redis_url: Optional[str] = None) -> Limiter:
+def get_limiter(redis_url: str | None = None) -> Limiter:
     """
     Create a rate limiter instance with Redis as the backend.
     

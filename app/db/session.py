@@ -1,8 +1,8 @@
-from typing import AsyncGenerator
 import datetime
+from collections.abc import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.config import settings
@@ -70,7 +70,7 @@ AsyncSessionLocal = async_sessionmaker(
     stop=stop_after_attempt(settings.max_retries),
     wait=wait_exponential(multiplier=settings.retry_backoff),
 )
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_async_session() -> AsyncGenerator[AsyncSession]:
     """Yield a new database session with retry logic."""
     async with AsyncSessionLocal() as session:
         yield session

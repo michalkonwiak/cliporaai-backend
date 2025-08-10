@@ -1,18 +1,17 @@
 import logging
-from typing import Dict, Any, AsyncGenerator, cast
-from datetime import datetime, timezone
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
+from typing import Any, cast
 
-import redis.asyncio as redis
 import aioboto3
-
-from fastapi import Depends, HTTPException, status, Security, Request
+import redis.asyncio as redis
+from fastapi import Depends, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import credentials_exception, TokenExpiredError
+from app.core.exceptions import TokenExpiredError, credentials_exception
 from app.core.security import decode_access_token
-
 from app.db.session import get_async_session
 from app.models.user import User
 
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 security = HTTPBearer(auto_error=False)
 
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession]:
     """
     Dependency function to get an async database session.
     Yields an AsyncSession and ensures it's closed after use.
@@ -75,7 +74,7 @@ async def get_current_user_token(
     return str(credentials.credentials)
 
 
-async def verify_token(token: str = Depends(get_current_user_token)) -> Dict[str, Any]:
+async def verify_token(token: str = Depends(get_current_user_token)) -> dict[str, Any]:
     """Verify JWT token and extract payload"""
     try:
         payload = decode_access_token(token)
@@ -96,7 +95,7 @@ async def verify_token(token: str = Depends(get_current_user_token)) -> Dict[str
 
 
 async def get_current_user(
-    db: AsyncSession = Depends(get_db), token_payload: Dict[str, Any] = Depends(verify_token)
+    db: AsyncSession = Depends(get_db), token_payload: dict[str, Any] = Depends(verify_token)
 ) -> User:
     """Get current authenticated user from token"""
     user_id = token_payload.get("sub")
@@ -116,11 +115,11 @@ async def get_current_user(
         )
 
     # Update last_login_at with timezone-aware datetime
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     last_login = user.last_login_at
     # Normalize to timezone-aware (UTC) if stored as naive in SQLite
     if last_login is not None and last_login.tzinfo is None:
-        last_login = last_login.replace(tzinfo=timezone.utc)
+        last_login = last_login.replace(tzinfo=UTC)
     if not last_login or (now - last_login).total_seconds() > 900:  # 15 minutes
         user.last_login_at = now
         await db.commit()

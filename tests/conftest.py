@@ -2,12 +2,12 @@ from collections.abc import AsyncGenerator
 from pathlib import Path
 from typing import Any
 
-import pytest_asyncio
 import httpx
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.security import hash_password
 from app.core.config import settings
+from app.core.security import hash_password
 from app.db.base import Base
 from app.dependencies import get_db
 
@@ -15,12 +15,11 @@ from app.dependencies import get_db
 settings.rate_limit_enabled = False
 
 from app.main import app  # noqa: E402
-from app.models.user import User  # noqa: E402
-from app.models.project import Project, ProjectType, ProjectStatus  # noqa: E402
-from app.models.video import Video, VideoCodec, VideoStatus  # noqa: E402
 from app.models.audio import Audio, AudioCodec, AudioStatus  # noqa: E402
+from app.models.project import Project, ProjectStatus, ProjectType  # noqa: E402
+from app.models.user import User  # noqa: E402
+from app.models.video import Video, VideoCodec, VideoStatus  # noqa: E402
 from app.services.auth_service import AuthService  # noqa: E402
-
 
 pytest_plugins = ["pytest_asyncio"]
 
@@ -35,7 +34,7 @@ AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
 @pytest_asyncio.fixture
-async def db() -> AsyncGenerator[AsyncSession, None]:
+async def db() -> AsyncGenerator[AsyncSession]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     async with AsyncSessionLocal() as session:
@@ -45,8 +44,8 @@ async def db() -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest_asyncio.fixture
-async def client(db: AsyncSession) -> AsyncGenerator[httpx.AsyncClient, None]:
-    async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
+async def client(db: AsyncSession) -> AsyncGenerator[httpx.AsyncClient]:
+    async def override_get_db() -> AsyncGenerator[AsyncSession]:
         yield db
 
     app.dependency_overrides[get_db] = override_get_db

@@ -1,11 +1,12 @@
 # ruff: noqa: S101
 from datetime import datetime
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.video import Video, VideoStatus, VideoCodec
+from app.models.video import Video, VideoCodec, VideoStatus
 from app.repositories.video_repository import VideoRepository
-from app.schemas.file import VideoCreate, FileUpdate
+from app.schemas.file import FileUpdate, VideoCreate
 
 
 @pytest.mark.asyncio

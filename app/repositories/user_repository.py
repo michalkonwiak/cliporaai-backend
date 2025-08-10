@@ -1,6 +1,7 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import cast
+
 from sqlalchemy import select
-from typing import Optional, cast
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password
 from app.models.user import User
@@ -19,7 +20,7 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
     async def get_by_email(self, email: str) -> User | None:
         """Get a user by email."""
         result = await self.db.execute(select(User).where(User.email == email))
-        return cast(Optional[User], result.scalar_one_or_none())
+        return cast(User | None, result.scalar_one_or_none())
 
     async def create_user(self, user_in: UserCreate) -> User:
         """Create a new user with hashed password."""

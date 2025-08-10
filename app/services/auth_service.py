@@ -1,12 +1,17 @@
 from datetime import timedelta
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 
 from app.core.config import settings
-from app.core.security import create_access_token, decode_access_token, verify_password, hash_password
+from app.core.security import (
+    create_access_token,
+    decode_access_token,
+    hash_password,
+    verify_password,
+)
 from app.models.user import User
 from app.schemas.user import Token, TokenPayload, UserCreate
 

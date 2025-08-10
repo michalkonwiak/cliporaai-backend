@@ -1,14 +1,14 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-from jose import JWTError, jwt, ExpiredSignatureError
+from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import ValidationError
 
 from app.core.config import settings
-from app.core.exceptions import credentials_exception, TokenExpiredError
+from app.core.exceptions import TokenExpiredError, credentials_exception
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(
-    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
+    data: dict[str, Any], expires_delta: timedelta | None = None
 ) -> str:
     """
     Create a new JWT access token.
@@ -94,11 +94,10 @@ def create_access_token(
             logger.error("No JWT private key loaded for signing")
             raise RuntimeError("JWT private key not loaded")
         return str(jwt.encode(to_encode, private_key, algorithm=ALGORITHM, headers=headers or None))
-    else:
-        return str(jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM, headers=headers or None))
+    return str(jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM, headers=headers or None))
 
 
-def decode_access_token(token: str) -> Dict[str, Any]:
+def decode_access_token(token: str) -> dict[str, Any]:
     """
     Decode and validate a JWT access token.
     

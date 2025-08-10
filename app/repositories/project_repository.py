@@ -1,4 +1,3 @@
-from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +13,7 @@ class ProjectRepository(BaseRepository[Project, ProjectCreate, ProjectUpdate]):
     def __init__(self, db: AsyncSession):
         super().__init__(Project, db)
 
-    async def get_by_user(self, user_id: int) -> List[Project]:
+    async def get_by_user(self, user_id: int) -> list[Project]:
         """Get all projects for a user."""
         stmt = select(Project).where(Project.user_id == user_id)
         result = await self.db.execute(stmt)

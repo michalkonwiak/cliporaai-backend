@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Union, cast, Any
+from typing import Any, cast
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ErrorDetail(BaseModel):
     """Model for a single error detail."""
-    loc: List[Union[str, int]] = Field(..., description="Location of the error")
+    loc: list[str | int] = Field(..., description="Location of the error")
     msg: str = Field(..., description="Error message")
     type: str = Field(..., description="Error type")
 
@@ -19,9 +19,9 @@ class ErrorDetail(BaseModel):
 class ErrorResponse(BaseModel):
     """Unified error response model."""
     status_code: int = Field(..., description="HTTP status code")
-    detail: Union[str, List[ErrorDetail]] = Field(..., description="Error details")
-    error_code: Optional[str] = Field(None, description="Application-specific error code")
-    request_id: Optional[str] = Field(None, description="Request ID for correlation")
+    detail: str | list[ErrorDetail] = Field(..., description="Error details")
+    error_code: str | None = Field(None, description="Application-specific error code")
+    request_id: str | None = Field(None, description="Request ID for correlation")
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
@@ -44,7 +44,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     
     error_response = ErrorResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        detail=cast(List[ErrorDetail], exc.errors()),
+        detail=cast(list[ErrorDetail], exc.errors()),
         error_code=None,
         request_id=request_id
     )

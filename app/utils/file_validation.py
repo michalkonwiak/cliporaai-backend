@@ -1,9 +1,8 @@
 import logging
-from typing import List, Optional, Tuple
 from pathlib import Path
 
 import magic
-from fastapi import UploadFile, HTTPException, status
+from fastapi import HTTPException, UploadFile, status
 
 from app.core.config import settings
 
@@ -13,9 +12,9 @@ mime_magic = magic.Magic(mime=True)
 
 async def validate_file(
     file: UploadFile,
-    allowed_mime_types: List[str],
-    max_size_mb: Optional[int] = None,
-) -> Tuple[str, int]:
+    allowed_mime_types: list[str],
+    max_size_mb: int | None = None,
+) -> tuple[str, int]:
     """
     Validate a file using magic bytes to check its actual type.
     
@@ -88,7 +87,7 @@ async def validate_file(
     return detected_mime_type, file_size
 
 
-async def validate_audio_file(file: UploadFile) -> Tuple[str, int]:
+async def validate_audio_file(file: UploadFile) -> tuple[str, int]:
     """
     Validate an audio file using magic bytes.
     
@@ -105,7 +104,7 @@ async def validate_audio_file(file: UploadFile) -> Tuple[str, int]:
     )
 
 
-async def validate_video_file(file: UploadFile) -> Tuple[str, int]:
+async def validate_video_file(file: UploadFile) -> tuple[str, int]:
     """
     Validate a video file using magic bytes.
     
@@ -122,7 +121,7 @@ async def validate_video_file(file: UploadFile) -> Tuple[str, int]:
     )
 
 
-def validate_file_path(file_path: Path, allowed_mime_types: List[str]) -> str:
+def validate_file_path(file_path: Path, allowed_mime_types: list[str]) -> str:
     """
     Validate a file on disk using magic bytes.
     

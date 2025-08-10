@@ -1,9 +1,10 @@
 # ruff: noqa: S101, S106, S105
 from datetime import datetime
+from typing import no_type_check
+
 import pytest
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import no_type_check
 
 from app.core.security import verify_password
 from app.models.user import User

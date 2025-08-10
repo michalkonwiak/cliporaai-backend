@@ -1,11 +1,12 @@
 # ruff: noqa: S101
-import pytest
+from collections.abc import AsyncGenerator
+from typing import Any
+
 import httpx
-from typing import Any, AsyncGenerator
+import pytest
 
-
-from app.main import app
 from app.dependencies import get_db, get_redis_client, get_s3_client
+from app.main import app
 
 
 class _FakeRedisOK:
@@ -94,7 +95,7 @@ class _FailSession:
         raise RuntimeError("DB error")
 
 
-async def _failing_db() -> AsyncGenerator[Any, None]:
+async def _failing_db() -> AsyncGenerator[Any]:
     yield _FailSession()
 
 

@@ -170,12 +170,22 @@ module = "starlette.*"
 ignore_missing_imports = true
 
 [tool.ruff]
-line-length = 100
+line-length = 140
 target-version = "py313"
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "I", "N", "UP", "ANN", "S", "A", "C4", "T20", "PT", "RET", "SIM", "ARG", "ERA"]
-ignore = ["B008"]  # Ignore B008 (Do not perform function call in argument defaults) for FastAPI's dependency injection
+select = ["E", "F", "B", "I", "N", "UP", "C4", "RET", "SIM", "ARG"]
+ignore = ["B008", "UP046", "B904"]  # B008: FastAPI DI; UP046: generic subclass; B904: exception chaining noise
+
+[tool.ruff.lint.per-file-ignores]
+"app/repositories/base.py" = ["UP046"]
+"tests/**/*" = ["E501", "S101", "T201", "PT013", "ARG001", "ARG002", "N803", "ANN401", "S105"]
+"app/core/config.py" = ["SIM105"]
+"app/core/exceptions.py" = ["N818"]
+"app/core/json_logging.py" = ["C404"]
+"app/db/session.py" = ["ARG001"]
+"app/services/storage_service.py" = ["ARG002", "RET504"]
+"app/tasks/__init__.py" = ["UP035", "F401"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]

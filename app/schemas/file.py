@@ -1,21 +1,20 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
 from app.domain.enums import (
-    FileType,
-    FileStatus,
-    VideoCodec,
     AudioCodec,
+    FileStatus,
+    FileType,
+    VideoCodec,
 )
 
 
 class FileBase(BaseModel):
     """Base schema for file metadata."""
     
-    title: Optional[str] = None
-    description: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
     project_id: int
 
 
@@ -36,8 +35,8 @@ class VideoCreate(FileCreate):
     height: int
     fps: float
     # Accept schema enum or raw string for codec
-    codec: Union[VideoCodec, str]
-    bitrate: Optional[int] = None
+    codec: VideoCodec | str
+    bitrate: int | None = None
 
 
 class AudioCreate(FileCreate):
@@ -45,10 +44,10 @@ class AudioCreate(FileCreate):
     
     duration: float
     # Accept schema enum or raw string for codec
-    codec: Union[AudioCodec, str]
-    bitrate: Optional[int] = None
-    sample_rate: Optional[int] = None
-    channels: Optional[int] = None
+    codec: AudioCodec | str
+    bitrate: int | None = None
+    sample_rate: int | None = None
+    channels: int | None = None
 
 
 class FileRead(FileBase):
@@ -57,13 +56,13 @@ class FileRead(FileBase):
     id: int
     filename: str
     original_filename: str
-    file_path: Optional[str] = None  # Made optional for tests
+    file_path: str | None = None  # Made optional for tests
     file_size: int
     mime_type: str
     status: FileStatus
     user_id: int
-    created_at: Optional[datetime] = None  # Made optional for tests
-    updated_at: Optional[datetime] = None
+    created_at: datetime | None = None  # Made optional for tests
+    updated_at: datetime | None = None
     
     class Config:
         from_attributes = True
@@ -76,18 +75,18 @@ class VideoRead(FileRead):
     width: int
     height: int
     fps: float
-    codec: Union[VideoCodec, str]
-    bitrate: Optional[int] = None
-    analysis_data: Optional[Dict] = None
-    scene_cuts: Optional[List] = None
-    audio_analysis: Optional[Dict] = None
-    face_detections: Optional[List] = None
-    emotion_analysis: Optional[List] = None
-    text_detections: Optional[List] = None
-    object_detections: Optional[List] = None
-    processing_time: Optional[float] = None
-    analyzed_at: Optional[datetime] = None
-    file_type: Optional[FileType] = FileType.VIDEO  # Changed to Optional
+    codec: VideoCodec | str
+    bitrate: int | None = None
+    analysis_data: dict | None = None
+    scene_cuts: list | None = None
+    audio_analysis: dict | None = None
+    face_detections: list | None = None
+    emotion_analysis: list | None = None
+    text_detections: list | None = None
+    object_detections: list | None = None
+    processing_time: float | None = None
+    analyzed_at: datetime | None = None
+    file_type: FileType | None = FileType.VIDEO  # Changed to Optional
 
     class Config:
         from_attributes = True
@@ -97,19 +96,19 @@ class AudioRead(FileRead):
     """Schema for reading audio metadata."""
     
     duration: float
-    codec: Union[AudioCodec, str]
-    bitrate: Optional[int] = None
-    sample_rate: Optional[int] = None
-    channels: Optional[int] = None
-    analysis_data: Optional[Dict] = None
-    beat_markers: Optional[List] = None
-    tempo: Optional[float] = None
-    key: Optional[str] = None
-    mood_analysis: Optional[Dict] = None
-    segment_analysis: Optional[List] = None
-    processing_time: Optional[float] = None
-    analyzed_at: Optional[datetime] = None
-    file_type: Optional[FileType] = FileType.AUDIO  # Changed to Optional
+    codec: AudioCodec | str
+    bitrate: int | None = None
+    sample_rate: int | None = None
+    channels: int | None = None
+    analysis_data: dict | None = None
+    beat_markers: list | None = None
+    tempo: float | None = None
+    key: str | None = None
+    mood_analysis: dict | None = None
+    segment_analysis: list | None = None
+    processing_time: float | None = None
+    analyzed_at: datetime | None = None
+    file_type: FileType | None = FileType.AUDIO  # Changed to Optional
 
     class Config:
         from_attributes = True
@@ -118,8 +117,8 @@ class AudioRead(FileRead):
 class FileUpdate(BaseModel):
     """Schema for updating file metadata."""
     
-    title: Optional[str] = None
-    description: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
 
 
 class FileUploadResponse(BaseModel):

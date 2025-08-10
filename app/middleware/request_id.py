@@ -1,6 +1,6 @@
-import uuid
 import logging
-from typing import Callable, Awaitable
+import uuid
+from collections.abc import Awaitable, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware

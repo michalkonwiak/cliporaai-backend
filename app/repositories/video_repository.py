@@ -1,12 +1,11 @@
-from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.video import Video
 from app.domain.enums import VideoStatus
+from app.models.video import Video
 from app.repositories.base import BaseRepository
-from app.schemas.file import VideoCreate, FileUpdate
+from app.schemas.file import FileUpdate, VideoCreate
 
 
 class VideoRepository(BaseRepository[Video, VideoCreate, FileUpdate]):
@@ -35,13 +34,13 @@ class VideoRepository(BaseRepository[Video, VideoCreate, FileUpdate]):
         await self.db.refresh(db_obj)
         return db_obj
 
-    async def get_by_project(self, project_id: int) -> List[Video]:
+    async def get_by_project(self, project_id: int) -> list[Video]:
         """Get all videos for a project."""
         stmt = select(Video).where(Video.project_id == project_id)
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_by_user(self, user_id: int) -> List[Video]:
+    async def get_by_user(self, user_id: int) -> list[Video]:
         """Get all videos for a user."""
         stmt = select(Video).where(Video.user_id == user_id)
         result = await self.db.execute(stmt)

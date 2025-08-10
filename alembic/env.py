@@ -1,7 +1,8 @@
 import os
 import sys
-from pathlib import Path
 from logging.config import fileConfig
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Add project root to sys.path
@@ -23,12 +24,12 @@ from app.db.base import Base  # noqa: E402
 
 # Import all models to ensure they are registered with Base.metadata
 from app.models import (  # noqa: F401, E402
-    User,
-    Project,
-    Video,
+    Audio,
     CuttingPlan,
     ExportJob,
-    Audio,
+    Project,
+    User,
+    Video,
 )
 
 config = context.config

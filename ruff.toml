@@ -1,9 +1,0 @@
-# Ruff configuration file
-
-# Ignore specific errors
-[lint]
-ignore = ["UP046"]  # Ignore Generic subclass instead of type parameters
-
-# Per-file ignores
-[lint.per-file-ignores]
-"app/repositories/base.py" = ["UP046"]

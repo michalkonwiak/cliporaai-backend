@@ -1,14 +1,13 @@
 import os
 import uuid
-from typing import List
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.video import Video
 from app.domain.enums import VideoStatus
+from app.models.video import Video
 from app.repositories.video_repository import VideoRepository
-from app.schemas.file import VideoCreate, FileUpdate
+from app.schemas.file import FileUpdate, VideoCreate
 from app.services.storage_service import get_storage_service
 
 
@@ -41,7 +40,7 @@ class VideoService:
         
         return video
 
-    async def get_videos_by_project(self, project_id: int, user_id: int) -> List[Video]:
+    async def get_videos_by_project(self, project_id: int, user_id: int) -> list[Video]:
         """
         Get all videos for a project
         """
@@ -49,7 +48,7 @@ class VideoService:
         # Filter videos by user_id for security
         return [video for video in videos if video.user_id == user_id]
 
-    async def get_videos_by_user(self, user_id: int) -> List[Video]:
+    async def get_videos_by_user(self, user_id: int) -> list[Video]:
         """
         Get all videos for a user
         """

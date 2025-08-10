@@ -3,7 +3,6 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List
 
 from fastapi import UploadFile
 
@@ -73,7 +72,7 @@ class StorageService(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def list_files(self, directory_path: str) -> List[str]:
+    async def list_files(self, directory_path: str) -> list[str]:
         """
         List files in a directory.
 
@@ -202,7 +201,7 @@ class LocalStorageService(StorageService):
         """
         return os.path.exists(file_path)
 
-    async def list_files(self, directory_path: str) -> List[str]:
+    async def list_files(self, directory_path: str) -> list[str]:
         """
         List files in a directory in local storage.
 
@@ -348,7 +347,7 @@ class S3StorageService(StorageService):
         except Exception:
             return False
 
-    async def list_files(self, directory_path: str) -> List[str]:
+    async def list_files(self, directory_path: str) -> list[str]:
         """
         List files in a directory in S3 storage.
 
@@ -388,8 +387,7 @@ def get_storage_service() -> StorageService:
     
     if storage_type == "local":
         return LocalStorageService()
-    elif storage_type == "s3":
+    if storage_type == "s3":
         return S3StorageService()
-    else:
-        logger.warning(f"Unknown storage type: {storage_type}, using local storage")
-        return LocalStorageService()
+    logger.warning(f"Unknown storage type: {storage_type}, using local storage")
+    return LocalStorageService()

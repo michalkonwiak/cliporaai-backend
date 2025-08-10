@@ -1,10 +1,9 @@
-from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.audio import Audio
 from app.domain.enums import AudioStatus
+from app.models.audio import Audio
 from app.repositories.base import BaseRepository
 from app.schemas.file import AudioCreate, FileUpdate
 
@@ -35,13 +34,13 @@ class AudioRepository(BaseRepository[Audio, AudioCreate, FileUpdate]):
         await self.db.refresh(db_obj)
         return db_obj
 
-    async def get_by_project(self, project_id: int) -> List[Audio]:
+    async def get_by_project(self, project_id: int) -> list[Audio]:
         """Get all audio files for a project."""
         stmt = select(Audio).where(Audio.project_id == project_id)
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_by_user(self, user_id: int) -> List[Audio]:
+    async def get_by_user(self, user_id: int) -> list[Audio]:
         """Get all audio files for a user."""
         stmt = select(Audio).where(Audio.user_id == user_id)
         result = await self.db.execute(stmt)

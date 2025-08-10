@@ -1,10 +1,12 @@
+from typing import Any
+
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Any
 
-from app.models.project import Project, ProjectStatus, ProjectType as ModelProjectType
-from app.schemas.project import ProjectCreate, ProjectUpdate
+from app.models.project import Project, ProjectStatus
+from app.models.project import ProjectType as ModelProjectType
 from app.repositories.project_repository import ProjectRepository
+from app.schemas.project import ProjectCreate, ProjectUpdate
 
 
 class ProjectService:
@@ -30,7 +32,7 @@ class ProjectService:
             )
         return project
 
-    async def list_projects(self, user_id: int) -> List[Project]:
+    async def list_projects(self, user_id: int) -> list[Project]:
         return await self.project_repository.get_by_user(user_id)
 
     async def create_project(self, project_in: ProjectCreate, user_id: int) -> Project:
@@ -61,4 +63,4 @@ class ProjectService:
     async def delete_project(self, project_id: int, user_id: int) -> None:
         project = await self.get_project(project_id, user_id)
         await self.project_repository.delete(project.id)
-        return None
+        return

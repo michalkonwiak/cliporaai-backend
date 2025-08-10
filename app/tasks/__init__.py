@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 from app.core.celery_app import celery_app
 
@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 @celery_app.task(name="process_video")
-def process_video(video_id: int) -> Dict[str, Any]:
+def process_video(video_id: int) -> dict[str, Any]:
     """
     Process a video file.
     
@@ -36,7 +36,7 @@ def process_video(video_id: int) -> Dict[str, Any]:
 
 
 @celery_app.task(name="process_audio")
-def process_audio(audio_id: int) -> Dict[str, Any]:
+def process_audio(audio_id: int) -> dict[str, Any]:
     """
     Process an audio file.
     

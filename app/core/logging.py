@@ -1,7 +1,6 @@
 import os
 import sys
 from logging.config import dictConfig
-from typing import List
 
 from app.core.config import settings
 from app.core.json_logging import JsonFormatter
@@ -15,7 +14,7 @@ def get_logging_config() -> dict:
     Falls back to console-only logging if file logging is disabled or fails.
     Includes configuration for uvicorn access logs to ensure request_id correlation.
     """
-    handlers: List[str] = ["console"]
+    handlers: list[str] = ["console"]
 
     # Configure handlers
     config_handlers = {

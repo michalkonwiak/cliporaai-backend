@@ -1,23 +1,24 @@
+import asyncio
 import logging
 import os
-import asyncio
-from typing import AsyncGenerator, Any
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from typing import Any
 
-import redis.asyncio as redis
 import aioboto3
-from alembic.config import Config as AlembicConfig
-from alembic import command
+import redis.asyncio as redis
 from botocore.config import Config as BotoConfig
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
+from alembic import command
+from alembic.config import Config as AlembicConfig
 from app.api.v1 import router as api_v1_router
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.rate_limiter import limiter, rate_limit_exceeded_handler
-from app.middleware import RequestIdMiddleware, MaxBodySizeMiddleware
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
+from app.middleware import MaxBodySizeMiddleware, RequestIdMiddleware
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ async def apply_migrations() -> None:
     try:
         logger.info("Applying database migrations with advisory lock...")
         from sqlalchemy import text
+
         from app.db.session import get_async_session
         
         async for session in get_async_session():
@@ -45,7 +47,7 @@ async def apply_migrations() -> None:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """
     Lifespan context manager for the FastAPI application.
     Creates and stores Redis and S3 clients in app.state.
@@ -100,7 +102,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                 raise RuntimeError("Redis sanity check failed")
             else:
                 logger.warning("Continuing startup without Redis (development mode)")
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.error(f"Redis sanity check timed out after {settings.connection_timeout}s")
         if settings.environment == "production":
             raise RuntimeError(f"Redis connection timed out after {settings.connection_timeout}s")
@@ -141,7 +143,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                 timeout=settings.connection_timeout
             )
             logger.info(f"S3 sanity check passed for bucket: {settings.s3_bucket_name}")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error(f"S3 sanity check timed out after {settings.connection_timeout}s")
             if settings.environment == "production":
                 raise RuntimeError(f"S3 connection timed out after {settings.connection_timeout}s")
@@ -187,6 +189,7 @@ app_state: Any = app.state
 app_state.limiter = limiter
 
 from app.core.error_handlers import setup_error_handlers  # noqa: E402
+
 setup_error_handlers(app)
 
 # Configure rate limiting middleware only when enabled and not in development to avoid interfering with docs
@@ -216,6 +219,7 @@ allowed_hosts = ["*"] if settings.environment == "development" else settings.tru
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -226,6 +230,7 @@ app.add_middleware(
 )
 
 from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
+
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.include_router(api_v1_router, prefix="/api/v1")
@@ -234,8 +239,9 @@ app.include_router(api_v1_router, prefix="/api/v1")
 
 
 if __name__ == "__main__":
-    import uvicorn
     import multiprocessing
+
+    import uvicorn
 
     is_dev = os.environ.get("ENVIRONMENT", "development") == "development"
     

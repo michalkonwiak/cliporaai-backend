@@ -1,13 +1,14 @@
 # ruff: noqa: S101, S106, S105
 from datetime import datetime
-import pytest
-import httpx
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import no_type_check
 
+import httpx
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.security import decode_access_token
 from app.models.user import User
 from app.services.auth_service import AuthService
-from app.core.security import decode_access_token
 
 
 @pytest.mark.asyncio

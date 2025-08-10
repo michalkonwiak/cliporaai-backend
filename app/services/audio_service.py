@@ -1,12 +1,11 @@
 import os
 import uuid
-from typing import List
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.audio import Audio
 from app.domain.enums import AudioStatus
+from app.models.audio import Audio
 from app.repositories.audio_repository import AudioRepository
 from app.schemas.file import AudioCreate, FileUpdate
 from app.services.storage_service import get_storage_service
@@ -41,7 +40,7 @@ class AudioService:
         
         return audio
 
-    async def get_audios_by_project(self, project_id: int, user_id: int) -> List[Audio]:
+    async def get_audios_by_project(self, project_id: int, user_id: int) -> list[Audio]:
         """
         Get all audio files for a project
         """
@@ -49,7 +48,7 @@ class AudioService:
         # Filter audios by user_id for security
         return [audio for audio in audios if audio.user_id == user_id]
 
-    async def get_audios_by_user(self, user_id: int) -> List[Audio]:
+    async def get_audios_by_user(self, user_id: int) -> list[Audio]:
         """
         Get all audio files for a user
         """

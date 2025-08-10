@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Literal, List
+from typing import Literal
 
 try:
     from dotenv import load_dotenv
@@ -8,15 +8,7 @@ try:
 except Exception:
     pass
 
-from pydantic import (
-    AnyUrl, 
-    Field, 
-    PostgresDsn, 
-    RedisDsn, 
-    SecretStr, 
-    model_validator,
-    PositiveInt
-)
+from pydantic import AnyUrl, Field, PositiveInt, PostgresDsn, RedisDsn, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -48,16 +40,16 @@ class Settings(BaseSettings):
     auto_migrate: bool = Field(False, description="Automatically run migrations on startup")
     
     # CORS settings
-    cors_origins: List[str] = Field(
+    cors_origins: list[str] = Field(
         ["http://localhost:3000"], 
         description="List of allowed origins for CORS"
     )
     cors_allow_credentials: bool = Field(True, description="Allow credentials for CORS")
-    cors_allow_methods: List[str] = Field(
+    cors_allow_methods: list[str] = Field(
         ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"], 
         description="List of allowed methods for CORS"
     )
-    cors_allow_headers: List[str] = Field(
+    cors_allow_headers: list[str] = Field(
         [
             "Authorization", 
             "Content-Type", 
@@ -75,7 +67,7 @@ class Settings(BaseSettings):
     )
     
     # Proxy settings
-    trusted_hosts: List[str] = Field(
+    trusted_hosts: list[str] = Field(
         ["cliporaai.com", "localhost", "127.0.0.1"],
         description="List of trusted hosts for proxy headers"
     )
@@ -131,7 +123,7 @@ class Settings(BaseSettings):
     rate_limit_transform_limit: str = Field("10/minute", description="Rate limit for transform endpoints")
     
     # Allowed file types
-    allowed_video_types: List[str] = Field(
+    allowed_video_types: list[str] = Field(
         [
             "video/mp4", 
             "video/quicktime", 
@@ -140,7 +132,7 @@ class Settings(BaseSettings):
         ],
         description="Allowed video MIME types"
     )
-    allowed_audio_types: List[str] = Field(
+    allowed_audio_types: list[str] = Field(
         [
             "audio/mpeg", 
             "audio/mp3",
