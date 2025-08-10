@@ -117,7 +117,11 @@ async def get_current_user(
 
     # Update last_login_at with timezone-aware datetime
     now = datetime.now(timezone.utc)
-    if not user.last_login_at or (now - user.last_login_at).total_seconds() > 900:  # 15 minutes
+    last_login = user.last_login_at
+    # Normalize to timezone-aware (UTC) if stored as naive in SQLite
+    if last_login is not None and last_login.tzinfo is None:
+        last_login = last_login.replace(tzinfo=timezone.utc)
+    if not last_login or (now - last_login).total_seconds() > 900:  # 15 minutes
         user.last_login_at = now
         await db.commit()
         await db.refresh(user)

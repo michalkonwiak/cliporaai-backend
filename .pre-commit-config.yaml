@@ -17,7 +17,6 @@ repos:
           "types-redis>=4.6.0.20240311",
           "types-aiobotocore[s3]>=2.7.0",
           "boto3-stubs[s3]>=1.34.0",
-          # core runtime deps needed for import resolution in pre-commit's isolated env
           "sqlalchemy>=2.0.0",
           "alembic>=1.16.4",
           "pydantic>=2.11.7",

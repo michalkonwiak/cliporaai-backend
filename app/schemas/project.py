@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 
 
 class ProjectType(str, Enum):
@@ -26,7 +26,7 @@ class ProjectBase(BaseModel):
     
     name: str
     description: Optional[str] = None
-    project_type: ProjectType = ProjectType.DYNAMIC
+    project_type: str = ProjectType.DYNAMIC.value
 
 
 class ProjectCreate(ProjectBase):
@@ -39,13 +39,24 @@ class ProjectRead(ProjectBase):
     
     id: int
     user_id: int
-    status: str  # Changed from ProjectStatus to str
+    status: str
     total_duration: float
     processing_progress: float
     timeline_data: Optional[Dict] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+
+    @staticmethod
+    def _to_lower_str(value: object) -> str:
+        try:
+            return str(getattr(value, "value", value)).lower()
+        except Exception:
+            return str(value).lower()
+
+    @field_serializer("status", "project_type")
+    def serialize_enums(self, value: object) -> str:
+        return self._to_lower_str(value)
     
     class Config:
         from_attributes = True
@@ -56,5 +67,5 @@ class ProjectUpdate(BaseModel):
     
     name: Optional[str] = None
     description: Optional[str] = None
-    project_type: Optional[ProjectType] = None
+    project_type: Optional[str] = None
     timeline_data: Optional[Dict] = None
